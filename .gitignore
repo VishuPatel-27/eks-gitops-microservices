@@ -54,3 +54,13 @@ test/tracetesting/tracetesting-vars.yaml
 *.apk
 
 !src/currency/build
+
+# Terraform files
+*.tfstate
+*.tfstate.backup
+*.terraform
+# Exclude all .tfvars files
+*.tfvars
+# Eclude log files
+*.log
+crash.log
