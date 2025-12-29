@@ -22,5 +22,4 @@ spec:
       name: tcp-service-0
       targetPort: 4000
   selector:
-    
     opentelemetry.io/name: opentelemetry-demo-flagd

@@ -1,32 +1,40 @@
 ---
 # Source: opentelemetry-demo/templates/component.yaml
 apiVersion: apps/v1
-kind: Deployment
-metadata:
+kind: Deployment # Defines a Deployment type resource
+metadata: # Metadata for the Deployment type resource
   name: opentelemetry-demo-recommendationservice
   labels:
-    
+    # labels used for organization and selection
+    # these labels are for identifying the application and its version
+    # they don't use in service discovery   
     opentelemetry.io/name: opentelemetry-demo-recommendationservice
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: recommendationservice
     app.kubernetes.io/name: opentelemetry-demo-recommendationservice
     app.kubernetes.io/version: "1.12.0"
     app.kubernetes.io/part-of: opentelemetry-demo
+# Here we define the specification of the Deployment
+# This includes the number of replicas, the selector for pods,
+# and the template for the pods
 spec:
-  replicas: 1
-  revisionHistoryLimit: 10
+  replicas: 1 # Number of pod replicas to run
+  revisionHistoryLimit: 10 # Number of old ReplicaSets to retain
+  # Selector to identify the pods managed by this Deployment
+  # This must match the labels defined in the pod template
   selector:
     matchLabels:
-      
       opentelemetry.io/name: opentelemetry-demo-recommendationservice
+  # Template for the pods managed by this Deployment
   template:
     metadata:
+      # This labels must match the selector above
       labels:
-        
         opentelemetry.io/name: opentelemetry-demo-recommendationservice
         app.kubernetes.io/instance: opentelemetry-demo
         app.kubernetes.io/component: recommendationservice
         app.kubernetes.io/name: opentelemetry-demo-recommendationservice
+    # Specification of the pod
     spec:
       serviceAccountName: opentelemetry-demo
       containers:
@@ -34,9 +42,9 @@ spec:
           image: 'ghcr.io/open-telemetry/demo:1.12.0-recommendationservice'
           imagePullPolicy: IfNotPresent
           ports:
-            
-            - containerPort: 8080
+            - containerPort: 8080 # Port on which the container listens
               name: service
+          # Environment variables for the container
           env:
             - name: OTEL_SERVICE_NAME
               valueFrom:

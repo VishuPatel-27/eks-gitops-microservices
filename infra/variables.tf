@@ -1,7 +1,7 @@
 variable "region" {
   description = "AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "terraform_s3_bucket_name" {
@@ -25,7 +25,7 @@ variable "vpc_cidr" {
 variable "availability_zones" {
   description = "Availability zones"
   type        = list(string)
-  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "private_subnet_cidrs" {
@@ -43,7 +43,7 @@ variable "public_subnet_cidrs" {
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
-  default     = "my-eks-cluster"
+  default     = "devops-otel-eks-cluster"
 }
 
 variable "cluster_version" {

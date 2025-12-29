@@ -10,10 +10,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = var.terraform_s3_bucket_name
+    bucket         = "devops-terraform-otel-eks-state-s3-bucket"
     key            = "terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = var.terraform_dynamoDB_state_lock
+    dynamodb_table = "terraform-eks-state-locks"
     encrypt        = true
   }
 }
