@@ -42,7 +42,7 @@ WORKDIR /usr/src/app/
 COPY --from=builder /usr/src/app/ ./
 
 # Expose the application port
-ENV AD_PORT 9099
+ENV AD_PORT=9099
 
 # Set the entry point to run the application
 ENTRYPOINT ["./build/install/opentelemetry-demo-ad/bin/Ad"]

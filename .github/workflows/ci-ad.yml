@@ -1,0 +1,107 @@
+# CI for ad Service
+name: ci-ad
+
+# Trigger the workflow on certain events including, 
+# 1. Pull requests to main branch
+# 2. Pushes to main branch
+# 3. Changes to files in the src/ad directory
+# 4. Changes to this workflow file
+
+on: 
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/ad/**'
+      - '.github/workflows/ci-ad.yaml'
+
+# Define the jobs to be run in the workflow
+jobs:
+    # 1. Build the Go application and run unit tests
+    build:
+      runs-on: ubuntu-latest # Github-hosted runner with Ubuntu OS
+      steps:
+      # Checkout the code from the repository
+      - name: checkout code
+        uses: actions/checkout@v4 
+      # Set up java environment with specified version
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5.1.0
+        with:
+          java-version: 21
+      # Build the java application
+      - name: Build
+        run: |
+          cd src/ad
+          chmod +x ./gradlew
+          ./gradlew installDist -PprotoSourceDir=./proto
+    
+    # 2. Build and Push Docker Image to Docker Hub
+    docker-build-and-push:
+        runs-on: ubuntu-latest  # Github-hosted runner with Ubuntu OS
+
+        # This job depends on the successful completion of the 'build' job
+        # Which means it will only run if the 'build' job passes
+        needs: build
+
+        steps:
+        # Checkout the code from the repository
+        - name: checkout code
+          uses: actions/checkout@v4
+      
+        - name: Install Docker
+          uses: docker/setup-buildx-action@v1
+        
+        # Login to Docker Hub using credentials stored in GitHub Secrets
+        - name: Login to Docker
+          uses: docker/login-action@v3
+          with:
+            username: ${{ vars.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_TOKEN }}
+        
+        # Build and push the Docker image to Docker Hub
+        - name: Docker Push
+          uses: docker/build-push-action@v6
+          with:
+            context: src/ad
+            file: src/ad/Dockerfile
+            push: true
+            tags: ${{ vars.DOCKER_USERNAME }}/devops-otel-ad:${{github.run_id}}
+
+    # 4. Update Kubernetes Deployment Manifest with New Image Tag
+    update-kubernetestes-manifest:
+        runs-on: ubuntu-latest  # Github-hosted runner with Ubuntu OS
+
+        # This job depends on the successful completion of the 'docker-build-and-push' job
+        needs: docker-build-and-push
+
+        steps:
+        # Checkout the code from the repository with write access (Token)
+        - name: checkout code
+          uses: actions/checkout@v4
+          with:
+            token: ${{ secrets.ULTIMATE_DEVOPS_PROJECT_GITHUB_TOKEN }}
+
+        # Update the image tag in the Kubernetes deployment manifest file
+        # Here we are using 'sed' command to find and replace the image tag
+        - name: Update tag in kubernetes deployment manifest
+          run: | 
+               sed -i "s|image: .*|image: ${{ vars.DOCKER_USERNAME }}/devops-otel-ad:${{github.run_id}}|" kubernetes/ad/deploy.yaml
+        
+        - name: Commit and push changes
+          run: |
+            git config --global user.email ${{ secrets.GIT_USER_EMAIL }}
+            git config --global user.name ${{ vars.GIT_USER_NAME }}
+            git add kubernetes/ad/deploy.yaml
+            git commit -m "[CI]: Update ad svc image tag"
+            git push origin HEAD:main -f
+
+        
+        
+          
+
+
+        
