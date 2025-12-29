@@ -53,6 +53,7 @@ var (
 	initResourcesOnce sync.Once
 )
 
+// Initialize logger and read product files into catalog
 func init() {
 	log = logrus.New()
 	var err error
