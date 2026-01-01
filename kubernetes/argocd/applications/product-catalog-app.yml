@@ -1,0 +1,46 @@
+# This ArgoCD Application manifest deploys the Product Catalog microservice.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+# Metadata for the Application resource
+metadata:
+  name: product-catalog-service
+  # This is where the ArgoCD Application resource itself is created
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"  # Deploy second after recommendation service
+
+# Spec section defining the desired state of the Application
+spec:
+  project: default
+  
+  # Source repository details for the Application
+  source:
+    repoURL: https://github.com/VishuPatel-27/ultimate-devops-project.git
+    targetRevision: main
+    # path to the Product Catalog microservice manifests where Kubernetes YAMLs are stored
+    # ArgoCD will look here to deploy the microservice
+    path: kubernetes/productcatalog  
+
+  # Destination cluster and namespace for the Application
+  # In-cluster deployment (default Kubernetes cluster)
+  destination:
+    server: https://kubernetes.default.svc
+    # This is where your actual application resources (Pods, Services, Deployments, Ingress) get deployed
+    namespace: default  # It's a namespace where the microservice will be deployed
+  
+  syncPolicy:
+    automated:
+      prune: true      # Delete resources if removed from Git
+      selfHeal: true   # Auto-sync if manual kubectl changes detected
+    syncOptions:
+      - CreateNamespace=true
+    # Configuration for retrying sync operations on failure
+    retry:
+      limit: 5 # Number of retry attempts
+      # Details of the backoff strategy between retries
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

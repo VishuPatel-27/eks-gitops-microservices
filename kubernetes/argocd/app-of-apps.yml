@@ -1,0 +1,39 @@
+# App of Apps pattern for ArgoCD
+# This Application manages multiple child applications defined in the specified path.
+apiVersion: argoproj.io/v1alpha1
+kind: Application # Defines an ArgoCD Application resource on cluster
+metadata:
+  # Metadata for the Application resource
+  # Name and namespace where ArgoCD is installed
+  name: devops-otel-app-of-apps
+  # This is where the ArgoCD Application resource itself is created
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+# Spec section defining the desired state of the Application
+spec:
+  # ArgoCD project to which this application belongs
+  # here it is set to 'default'means it belongs to the default project
+  project: default  
+
+  # Source repository details for the Application
+  source:
+    # Git repository URL containing the child applications
+    repoURL: https://github.com/VishuPatel-27/ultimate-devops-project.git
+    targetRevision: main  # Your trunk branch
+    path: kubernetes/argocd/applications  # Points to child applications folder
+  
+  # Destination cluster and namespace for the Application
+  destination:
+    # In-cluster deployment (default Kubernetes cluster)
+    server: https://kubernetes.default.svc
+    # This is where your actual application resources (Pods, Services, Deployments, Ingress) get deployed
+    namespace: default  # It's a namespace where the microservice will be deployed
+  
+  # Sync policy for automated synchronization of the Application
+  syncPolicy:
+    automated:
+      prune: true      # Remove apps if YAML is deleted
+      selfHeal: true   # Auto-sync if drift detected
+    syncOptions:
+      - CreateNamespace=true # Auto-create namespace if it doesn't exist

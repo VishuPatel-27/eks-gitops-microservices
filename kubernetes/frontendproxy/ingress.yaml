@@ -3,18 +3,42 @@ kind: Ingress
 metadata:
   name: frontend-proxy
   annotations:
+    # Decides who can reach your app.
+    #Internet facing means public internet can hit it.
     alb.ingress.kubernetes.io/scheme: internet-facing
+    
+    #Targets pods directly using their IPs.
+    #Better for Kubernetes, fewer hops, works nicely with managed node groups and Fargate.
     alb.ingress.kubernetes.io/target-type: ip
+    
+    # Says the ALB must listen on port 443 with HTTPS.
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]' 
+
+    # Forces every HTTP request to redirect to HTTPS.
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+    # Specifies the ARN of the ACM certificate to use for HTTPS. 
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/xyz
+
+    # Specifies the protocol to use when connecting to the backend service. 
+    alb.ingress.kubernetes.io/backend-protocol: HTTP 
+    
+    #alb.ingress.kubernetes.io/healthcheck-path: /health
 spec:
+  # defines which IngressClass to use,
+  # in this case the AWS ALB Ingress Controller
   ingressClassName: alb
   rules:
-    - host: example.com
+    - host: www.vishukumarpatel.com
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
+                # name of the service to route traffic to
+                # must be in the same namespace as the Ingress
+                # for this example, the "frontendproxy" service
                 name: opentelemetry-demo-frontendproxy
                 port:
                   number: 8080
