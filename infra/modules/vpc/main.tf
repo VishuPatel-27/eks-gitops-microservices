@@ -77,6 +77,8 @@ resource "aws_route_table" "public" {
 
   # This route directs traffic to the Internet Gateway
   route {
+    # This route allows outbound traffic to the internet
+    # Means that any traffic destined for outside the VPC will be sent to the internet gateway
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
@@ -93,6 +95,8 @@ resource "aws_route_table" "private" {
 
   # This route directs traffic to the NAT Gateway
   route {
+    # This route allows outbound traffic to the internet via the NAT gateway
+    # Means that any traffic destined for outside the VPC will be sent to the NAT gateway
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.main[count.index].id
   }
