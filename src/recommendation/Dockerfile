@@ -58,5 +58,5 @@ COPY ./logger.py logger.py
 COPY ./metrics.py metrics.py
 COPY ./recommendation_server.py recommendation_server.py
 
-EXPOSE ${RECOMMENDATION_PORT}
+ENV RECOMMENDATION_PORT=1010
 ENTRYPOINT [ "/venv/bin/opentelemetry-instrument", "/venv/bin/python", "recommendation_server.py" ]
