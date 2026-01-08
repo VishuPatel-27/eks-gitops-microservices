@@ -29,7 +29,7 @@ metadata:
     
     # Health check settings for the ALB to monitor the health of the Argo CD server.
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS
-    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-path: /helthz
 
 spec:
   # defines which IngressClass to use,
